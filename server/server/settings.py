@@ -39,10 +39,11 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    'djoser',
     'rest_framework',
 
     'job',
-    'user'
+    'users',
 ]
 
 MIDDLEWARE = [
@@ -79,10 +80,10 @@ WSGI_APPLICATION = 'server.wsgi.application'
 DATABASES = {
     'default': {
          'ENGINE': 'django.db.backends.postgresql_psycopg2',
-         'NAME': os.getenv('PGSQL_DBNAME'),
-         'USER': os.getenv('PGSQL_USER'),
-         'PASSWORD': os.getenv('PGSQL_PASSWORD'),
-         'HOST': os.getenv('PGSQL_HOST'),
+         'NAME': os.getenv('DB_NAME'),
+         'USER': os.getenv('DB_USER'),
+         'PASSWORD': os.getenv('DB_PASSWORD'),
+         'HOST': os.getenv('DB_HOST'),
          'PORT': ''
     }
 }
@@ -131,4 +132,4 @@ STATIC_URL = '/static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-AUTH_USER_MODEL = 'user.User'
+AUTH_USER_MODEL = 'users.User'
