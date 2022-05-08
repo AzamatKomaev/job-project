@@ -2,7 +2,6 @@ from django.contrib.auth import get_user_model
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 
-from core.views import ListRetrieveViewSet
 from .serializers import UserSerializer
 from .permissions import AuthPermission
 
@@ -23,8 +22,3 @@ class AuthViewSet(viewsets.ViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-
-class UserListRetrieveView(ListRetrieveViewSet):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
