@@ -17,7 +17,7 @@ class UserTestCase(APITestCase):
         del field
         # trying to create user with not valid password, role and email.
         user_creating_with_not_valid_data_response = send_test_request(
-            'POST',
+            method='POST',
             path_name='auth.create_user',
             data={
                 'username': 'user1',
@@ -75,7 +75,7 @@ class UserTestCase(APITestCase):
             method='POST',
             path_name='auth.create_user',
             data={
-                'username': 'user2',
+                'username': 'user1',
                 'first_name': 'David',
                 'last_name': 'Johnson',
                 'role': 'employer',
@@ -84,8 +84,12 @@ class UserTestCase(APITestCase):
             }
         )
         user_creating_with_existing_data_response_json = user_creating_with_existing_data_response.json()
-        self.assertEqual(len(user_creating_with_existing_data_response_json), 1)
-        self.assertIn('email', user_creating_with_existing_data_response_json)
+        self.assertEqual(len(user_creating_with_existing_data_response_json), 2)
+
+        for field in ('email', 'username'):
+            self.assertIn(field, user_creating_with_existing_data_response_json)
+
+        del field
         self.assertEqual(
             user_creating_with_existing_data_response_json['email'][0],
             'A user with that email already exists.'
