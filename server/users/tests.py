@@ -3,7 +3,7 @@ from core.tests import send_test_request
 
 
 class UserTestCase(APITestCase):
-    def test_creating_users(self):
+    def test_users(self):
         # trying to create user without data.
         user_creating_without_data_response = send_test_request(
             method='POST',
@@ -94,3 +94,79 @@ class UserTestCase(APITestCase):
             user_creating_with_existing_data_response_json['email'][0],
             'A user with that email already exists.'
         )
+
+        # trying to log in a user without data.
+        user_logining_without_data_response = send_test_request(
+            method='POST',
+            path_name='login',
+            data={}
+        )
+        user_logining_without_data_response_json = user_logining_without_data_response.json()
+        self.assertEqual(user_logining_without_data_response.status_code, 400)
+        self.assertIn('non_field_errors', user_logining_without_data_response_json)
+        self.assertEqual(
+            user_logining_without_data_response_json['non_field_errors'][0],
+            'Unable to log in with provided credentials.'
+        )
+
+        # trying to log in a user with not valid password.
+        user_logining_with_not_valid_password_response = send_test_request(
+            method='POST',
+            path_name='login',
+            data={
+                'username': 'user1',
+                'password': 'll'
+            }
+        )
+        user_logining_with_not_valid_password_response_json = user_logining_with_not_valid_password_response.json()
+        self.assertEqual(user_logining_with_not_valid_password_response.status_code, 400)
+        self.assertIn('non_field_errors', user_logining_with_not_valid_password_response_json)
+        self.assertEqual(
+            user_logining_with_not_valid_password_response_json['non_field_errors'][0],
+            'Unable to log in with provided credentials.'
+        )
+
+        # log in a user.
+        user_logining_response = send_test_request(
+            method='POST',
+            path_name='login',
+            data={
+                'username': 'user1',
+                'password': 'user1_pwd'
+            }
+        )
+        user_logining_response_json = user_logining_response.json()
+        self.assertEqual(user_logining_response.status_code, 200)
+        self.assertIn('auth_token', user_logining_response_json)
+        self.assertEqual(len(user_logining_response_json['auth_token']), 40)
+
+        # trying to get a current user without entering a token.
+        user_current_without_token_response = send_test_request(
+            method='GET',
+            path_name='user-me'
+        )
+        user_current_without_token_response_json = user_current_without_token_response.json()
+        self.assertEqual(user_current_without_token_response.status_code, 401)
+        self.assertIn('detail', user_current_without_token_response_json)
+        self.assertEqual(
+            user_current_without_token_response_json['detail'],
+            'Authentication credentials were not provided.'
+        )
+
+        # getting a current user.
+        user_current_response = send_test_request(
+            method='GET',
+            path_name='user-me',
+            headers={
+                'HTTP_AUTHORIZATION': f'Token {user_logining_response_json["auth_token"]}'
+            }
+        )
+        user_current_response_json = user_current_response.json()
+        self.assertEqual(user_current_response.status_code, 200)
+
+        for field in ('email', 'id', 'username'):
+            self.assertIn(field, user_current_response_json)
+
+        self.assertEqual(user_current_response_json['email'], 'mail@mail.ru')
+        self.assertEqual(user_current_response_json['id'], 1)
+        self.assertEqual(user_current_response_json['username'], 'user1')
